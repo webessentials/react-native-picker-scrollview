@@ -29,7 +29,12 @@ export default class ScrollPicker extends Component {
         itemHeight:PropTypes.number,
         wrapperHeight:PropTypes.number,
         wrapperColor:PropTypes.string,
+        disabled:PropTypes.bool,
     };
+
+    static defaultProps = {
+        disabled: false,
+    }
 
     constructor(props){
         super(props);
@@ -42,13 +47,12 @@ export default class ScrollPicker extends Component {
         };
     }
 
-    componentDidMount(){
-        if(this.props.selectedIndex){
-            setTimeout(() => {
-                this.scrollToIndex(this.props.selectedIndex, this.props.animateToSelectedIndex);
-            }, 0);
+    UNSAFE_componentWillReceiveProps(nextProps) {
+        if (nextProps.selectedIndex !== this.propsselectedIndex) {
+            this.scrollToIndex(nextProps.selectedIndex, false);
         }
     }
+
     componentWillUnmount(){
         this.timer && clearTimeout(this.timer);
     }
@@ -80,8 +84,9 @@ export default class ScrollPicker extends Component {
                 <View style={highlightStyle}></View>
                 <ScrollView
                     ref={(sview) => { this.sview = sview; }}
+                    scrollEnabled={!this.props.disabled}
                     bounces={false}
-                    showsVerticalScrollIndicator={false} 
+                    showsVerticalScrollIndicator={false}
                     nestedScrollEnabled={true}
                     onMomentumScrollBegin={this._onMomentumScrollBegin.bind(this)}
                     onMomentumScrollEnd={this._onMomentumScrollEnd.bind(this)}
@@ -126,7 +131,7 @@ export default class ScrollPicker extends Component {
         let selectedIndex = Math.round(y / h);
         let _y = selectedIndex * h;
         if(_y !== y){
-            // using scrollTo in ios, onMomentumScrollEnd will be invoked 
+            // using scrollTo in ios, onMomentumScrollEnd will be invoked
             if(Platform.OS === 'ios'){
                 this.isScrollTo = true;
             }
